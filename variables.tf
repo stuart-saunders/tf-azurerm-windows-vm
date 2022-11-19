@@ -1,4 +1,289 @@
-# variable "var_name" {
+# variable "workload" {
+#   type = string
+#   description = "(Required) The descriptor of the workload which the resource supports"
+# }
+
+# variable "environment" {
+#   type = string
+#   description = "The environment to which the resource belongs"
+#   default = "dev"
+# }
+
+variable "name" {
+  description = "The name to assign to the VM"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9_-]{1,14}$", var.name))
+    error_message = "The name can contain alphanumeric, `_` & `-` characters only and should be less than 14 characters (with no spaces)."
+  }
+}
+
+variable "location" {
+  type = string
+  description = "The Azure location where the Virtual Machine should be created. Defaults to the Resource Group location."
+}
+
+variable "resource_group_name" {
+  type        = string
+  description = "(Required) The name the Resource Group in which to create the Virtual Machine"
+}
+
+# variable "resource_group_location" {
 #   type        = string
-#   description = "The description of the variable"
+#   description = "(Required) The Azure region in which the Resource Group should be created"
+# }
+
+
+
+variable "admin_password" {
+  type        = string
+  description = "(Required) The password to assign to the Virtual Machine's Admin user account"
+  sensitive   = true
+}
+
+variable "admin_username" {
+  type        = string
+  description = "The username to assign to the Virtual Machine's Admin user account. Defaults to 'adminuser'."
+  default     = "adminuser"
+  sensitive   = true
+}
+
+variable "network_interface_ids" {
+  type = list(string)
+  description = "A list of Network Interface Ids which should be attached to this Virtual Machine"
+  default = []
+}
+
+variable "os_disk" {
+  type = object({
+    name = optional(string, null)
+    caching = string
+    storage_account_type = string
+    disk_encryption_set_id = optional(string, null)
+    disk_size_gb = optional(string, null)
+    secure_vm_disk_encyption_set_id = optional(string, null)
+  })
+  default = {
+    caching = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+}
+
+variable "availability_set_id" {
+  type = string
+  description = "Specifies the ID of the Availability Set in which the Virtual Machine should exist"
+  default = null
+}
+
+variable "boot_diagnostics" {
+  type = object({
+    storage_account_uri = optional(string)
+  })
+  description = "The Primary/Secondary Endpoint for the Azure Storage Account which should be used to store Boot Diagnostics"
+  default = {}
+}
+
+variable "computer_name" {
+  type = string
+  description = "Specifies the Hostname which should be used for this Virtual Machine"
+  default = null
+}
+
+variable "source_image_id" {
+  type = string
+  description = "The ID of the Image which this Virtual Machine should be created from"
+  default = null
+}
+
+variable "source_image_reference" {
+  type = object({
+    publisher = string
+    offer = string
+    sku = string
+    version = string    
+  })
+  description = "value"
+  default = null
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "(Optional) The list of tags to apply to the resources"
+  default     = {}
+}
+
+variable "subnet_id" {
+  type        = string
+  description = "The Id of the subnet where the Virtual Machine's main NIC resides"
+}
+
+variable "nic_ip_configuration" {
+  type = object({
+    name = string
+    gateway_load_balancer_fronend_ip_configuration_id = optional(string)
+    
+    private_ip_address_allocation = string
+    public_ip_address_id = optional(string)
+    
+    primary = optional(bool)
+    private_ip_address = optional(string)
+    subnet_id = string
+  })
+  
+}
+
+variable "virtual_machines" {
+  type = map(object({
+    name = string
+    resource_group_name = string
+    location = string
+
+    size = string
+    admin_username = string
+
+    os_disk = object({
+      name = optional(string, null)
+      
+    })
+  }))
+  description = "The configurations of the Virtual Machines to create"
+}
+
+# variable "virtual_network_name" {
+#   type        = string
+#   description = "(Required) The name of the Virtual Network to create"
+# }
+
+# variable "virtual_network_location" {
+#   type        = string
+#   description = "(Optional) The Azure region in which the Virtual Network should be created"
+#   default     = null
+# }
+
+# variable "location" {
+#   description = "The Azure region where the new resource will be created"
+#   type        = string
+#   default     = "UK South"
+# }
+
+# variable "resource_group_name" {
+#   description = "The name of the Resource Group where the new VM should be created."
+#   type        = string
+# }
+
+
+
+# variable "subnet_id" {
+#   type        = string
+#   description = "The ID of the subnet where the VMs main NIC will reside"
+# }
+
+
+# variable "boot_diagnostics_storage_account_name" {
+#   description = "The Storage account to use for VM Boot diagnostic logging."
+#   type        = string
+#   default     = null
+# }
+
+# variable "storage_os_disk_config" {
+#   description = <<EOF
+#     Optional: Map to configure OS storage disk. (Caching, size, storage account type...)
+#     Default settings are:
+#       disk_size_gb           = "127" # minimum disk size of 127GB
+#       caching                = "ReadWrite"
+#       storage_account_type   = "Standard_LRS"
+#       disk_encryption_set_id = null
+    
+#     Example:
+#       storage_os_disk_config = {
+#         disk_size_gb         = "200"
+#         caching              = "ReadWrite"
+#         storage_account_type = "Standard_LRS"
+#       }
+# EOF
+#   type        = map(string)
+#   default     = {}
+# }
+
+# variable "marketplace_image" {
+#   type        = bool
+#   description = "Is the image being deployed from the Marketplace? If so, then `vm_image_plan` should also be set."
+#   default     = false
+# }
+# variable "vm_image" {
+#   description = <<EOF
+#   Optional: Virtual Machine source image information. See https://www.terraform.io/docs/providers/azurerm/r/windows_virtual_machine.html#source_image_reference
+#   Default image is:
+#     publisher = "MicrosoftWindowsServer"
+#     offer     = "WindowsServer"
+#     sku       = "2019-Datacenter"
+#     version   = "latest"
+#   Find details of a publishers `offer` using PowerShell.
+#     $pubName = "<publisher>"
+#     Get-AzVMImageOffer -Location "uksouth" -PublisherName $pubName | Select Offer
+#   Find details of the offers `SKU` using PowerShell.
+#     $pubName = "<publisher>"
+#     $offerName = "<offer>"
+#     Get-AzVMImageSku -Location "uksouth" -PublisherName $pubName -Offer $offerName | Select Skus
+#   List the versions that are available for the image.
+#      $skuName = "<SKU>"
+#      $pubName = "<publisher>"
+#      $offerName = "<offer>"
+#      Get-AzVMImage -Location "uksouth" -PublisherName $pubName -Offer $offerName -Sku $skuName | Select Version
+#     when using a marketplace image from a 3rd party, you may need to first accept their license agreement.
+#     https://go.microsoft.com/fwlink/?linkid=862451
+#   Example:
+#     vm_image = {
+#       publisher = "MicrosoftWindowsServer"
+#       offer     = "WindowsServer"
+#       sku       = "2016-Datacenter"
+#       version   = "latest"   # changing version forces a replacement
+#     }
+# EOF
+#   type        = map(string)
+#   default     = {}
+# }
+
+# variable "vm_image_plan" {
+#   description = <<EOF
+#   If using an image from the Marketplace, then the Plan information should be completed.
+#   Do not use this input if using a Microsoft Marketplace image (publisher = "MicrosoftWindowsServer").
+#   When using a marketplace image, ensure the `vm_image` input parameter details are correct for the `plan`.
+  
+#   EXAMPLE:
+#     vm_image_plan = {
+#       name      = "cis-ws2019-l1"
+#       product   = "cis-windows-server-2019-v1-0-0-l1"
+#       publisher = "center-for-internet-security-inc"
+#     }
+# EOF
+#   type        = map(string)
+#   default     = {}
+# }
+
+# variable "source_image_id" {
+#   type        = string
+#   description = <<EOF
+#   Optional: The ID of the Image which this Virtual Machine should be created from. 
+#   Use when deploying a custom image. One of either `source_image_id` OR `vm_image` must be used.
+# EOF
+#   default     = null
+# }
+
+# variable "provision_vm_agent" {
+#   type        = bool
+#   description = "Optional: Should the Azure VM agent be provisioned on this VM? Defaults to `true`"
+#   default     = true
+# }
+
+# variable "enable_automatic_updates" {
+#   type        = bool
+#   description = "Should updates be automatically applied. Defaults to `true`."
+#   default     = true
+# }
+
+# variable "tags" {
+#   description = "(optional) a map of 'key'= 'value' pairs to add as tags. In addition to the default tags"
+#   type        = map(string)
+#   default     = {}
 # }
