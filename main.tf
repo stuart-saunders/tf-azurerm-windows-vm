@@ -1,12 +1,12 @@
 resource "azurerm_network_interface" "this" {
-  name                = "${var.name}-nic"
+  name                = var.network_interface.name != null ? var.network_interface.name : "${var.name}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
 
   ip_configuration {
-    name                          = var.nic_ip_configuration.name
-    subnet_id                     = var.nic_ip_configuration.subnet_id
-    private_ip_address_allocation = var.nic_ip_configuration.private_ip_address_allocation
+    name                          = var.network_interface.ip_configuration.name
+    subnet_id                     = var.network_interface.ip_configuration.subnet_id
+    private_ip_address_allocation = var.network_interface.ip_configuration.private_ip_address_allocation
   }
 
   tags = var.tags

@@ -74,20 +74,25 @@ variable "size" {
   description = "The SKU which should be used for this VM"
 }
 
-variable "nic_ip_configuration" {
+variable "network_interface" {
   type = object({
-    name                          = string
-    subnet_id                     = string
-    private_ip_address_allocation = string
+    name = optional(string, null)
+    ip_configuration = object({
+      name                          = string
+      subnet_id                     = string
+      private_ip_address_allocation = string
 
-    gateway_load_balancer_frontend_ip_configuration_id = optional(string)
-    primary                                            = optional(bool)
-    private_ip_address                                 = optional(string)
-    private_ip_address_version                         = optional(string)
-    public_ip_address_id                               = optional(string)
+      gateway_load_balancer_frontend_ip_configuration_id = optional(string)
+      primary                                            = optional(bool)
+      private_ip_address                                 = optional(string)
+      private_ip_address_version                         = optional(string)
+      public_ip_address_id                               = optional(string)
+    })
   })
   description = <<-DESC
-    The IP Configuration of the Network Interface to be created for this VM.
+    The configuration of the Network Interface to be created for this VM.
+    **name**: The optional name for the Network Interface
+    The Network Interface's IP Configuration can be set with the following:-
     **name**: _(Required)_ The name for this IP Configuration
     **subnet_id**: _(Required)_ The ID of the subnet where this Network Interface should be located
     **private_ip_address_allocation**: _(Required)_ The allocation method used for the Private IP Address. Possible values are `Dynamic` and `Static`.
