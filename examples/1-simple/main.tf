@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "this" {
-  name     = var.resource_group_name
-  location = var.location
+  name     = var.resource_group.name
+  location = var.resource_group.location
 }
 
 resource "azurerm_virtual_network" "this" {
@@ -18,23 +18,25 @@ resource "azurerm_subnet" "this" {
 }
 
 module "vm" {
-  source = "../"
+  source = "../../"
 
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
 
-  name = var.name
-  size = var.size
+  name = var.vm.name
+  size = var.vm.size
 
-  admin_username = var.admin_username
-  admin_password = var.admin_password
+  admin_username = var.vm.admin_username
+  admin_password = var.vm.admin_password
 
-  os_disk                = var.os_disk
-  source_image_reference = var.source_image_reference
+  os_disk                = var.vm.os_disk
+  source_image_reference = var.vm.source_image_reference
 
-  nic_ip_configuration = {
-    name                          = var.nic_ip_configuration.name
-    subnet_id                     = azurerm_subnet.this.id
-    private_ip_address_allocation = var.nic_ip_configuration.private_ip_address_allocation
+  network_interface = {
+    ip_configuration = {
+      name = var.vm.network_interface.ip_configuration.name
+      private_ip_address_allocation = var.vm.network_interface.ip_configuration.private_ip_address_allocation
+      subnet_id = azurerm_subnet.this.id
+    }
   }
 }
