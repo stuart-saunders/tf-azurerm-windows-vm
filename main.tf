@@ -1,4 +1,6 @@
 resource "azurerm_network_interface" "this" {
+  count = var.network_interface == null ? 0 : 1
+
   name                = var.network_interface.name != null ? var.network_interface.name : "${var.name}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -7,9 +9,13 @@ resource "azurerm_network_interface" "this" {
     name                          = var.network_interface.ip_configuration.name
     subnet_id                     = var.network_interface.ip_configuration.subnet_id
     private_ip_address_allocation = var.network_interface.ip_configuration.private_ip_address_allocation
-  }
 
-  tags = var.tags
+    gateway_load_balancer_frontend_ip_configuration_id = var.network_interface.ip_configuration.gateway_load_balancer_frontend_ip_configuration_id
+    primary                                            = var.network_interface.ip_configuration.primary
+    private_ip_address                                 = var.network_interface.ip_configuration.private_ip_address
+    private_ip_address_version                         = var.network_interface.ip_configuration.private_ip_address_version
+    public_ip_address_id                               = var.network_interface.ip_configuration.public_ip_address_id
+  }
 }
 
 resource "azurerm_windows_virtual_machine" "this" {
@@ -21,13 +27,13 @@ resource "azurerm_windows_virtual_machine" "this" {
   admin_username = var.admin_username
   admin_password = var.admin_password
 
-  network_interface_ids = setunion(
-    [azurerm_network_interface.this.id],
+  network_interface_ids = concat(
+    azurerm_network_interface.this != [] ? [ azurerm_network_interface.this[0].id ] : [],
     var.network_interface_ids
   )
 
   os_disk {
-    name = try(var.os_disk.name, null)
+    name = var.os_disk.name != null ? var.os_disk.name : "${var.name}-osdisk"
 
     caching              = var.os_disk.caching
     storage_account_type = var.os_disk.storage_account_type

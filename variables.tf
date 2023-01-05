@@ -82,11 +82,11 @@ variable "network_interface" {
       subnet_id                     = string
       private_ip_address_allocation = string
 
-      gateway_load_balancer_frontend_ip_configuration_id = optional(string)
-      primary                                            = optional(bool)
-      private_ip_address                                 = optional(string)
-      private_ip_address_version                         = optional(string)
-      public_ip_address_id                               = optional(string)
+      gateway_load_balancer_frontend_ip_configuration_id = optional(string, null)
+      primary                                            = optional(bool, null)
+      private_ip_address                                 = optional(string, null)
+      private_ip_address_version                         = optional(string, null)
+      public_ip_address_id                               = optional(string, null)
     })
   })
   description = <<-DESC
