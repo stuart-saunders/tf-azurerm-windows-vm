@@ -1,3 +1,2 @@
-# Terraform Module Template
-
-Starter template for Terraform modules
+# Azure Windows Virtual Machine - Terraform Module
+This module can be used to provision Windows Virtual Machines in Azure.
