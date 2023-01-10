@@ -1,6 +1,3 @@
-# resource_group_name = "rg-vm-module-test"
-# location            = "uksouth"
-
 resource_group = {
   name     = "rg-vm-module-test"
   location = "uksouth"
@@ -18,14 +15,13 @@ vnets = [
 
         vms = [
           {
-            name = "vm1"
+            name = "vn1-sn1-vm1"
             size = "Standard_B2s"
 
             admin_username = "adminuser"
             admin_password = "p@ssw0rd1234!!"
 
             os_disk = {
-              name                 = "vm1-os"
               caching              = "ReadWrite"
               storage_account_type = "Standard_LRS"
             }
@@ -35,13 +31,6 @@ vnets = [
               offer     = "WindowsServer"
               sku       = "2019-Datacenter"
               version   = "latest"
-            }
-
-            network_interface = {
-              ip_configuration = {
-                name                          = "internal"
-                private_ip_address_allocation = "Dynamic"
-              }
             }
           }
         ]
@@ -59,14 +48,13 @@ vnets = [
 
         vms = [
           {
-            name = "vm1a"
+            name = "vn2-sn1-vm1"
             size = "Standard_B2s"
 
             admin_username = "adminuser"
             admin_password = "p@ssw0rd1234!!"
 
             os_disk = {
-              name                 = "vm1-os"
               caching              = "ReadWrite"
               storage_account_type = "Standard_LRS"
             }
@@ -79,21 +67,22 @@ vnets = [
             }
 
             network_interface = {
+              name = "vn2-sn1-vm1-nic-custom"
               ip_configuration = {
-                name                          = "internal"
+                name                          = "config-custom"
                 private_ip_address_allocation = "Dynamic"
+                primary                       = true
               }
             }
           },
           {
-            name = "vm1b"
+            name = "vn2-sn1-vm2"
             size = "Standard_B2s"
 
             admin_username = "adminuser"
             admin_password = "p@ssw0rd1234!!"
 
             os_disk = {
-              name                 = "vm1-os"
               caching              = "ReadWrite"
               storage_account_type = "Standard_LRS"
             }
@@ -103,13 +92,6 @@ vnets = [
               offer     = "WindowsServer"
               sku       = "2019-Datacenter"
               version   = "latest"
-            }
-
-            network_interface = {
-              ip_configuration = {
-                name                          = "internal"
-                private_ip_address_allocation = "Dynamic"
-              }
             }
           }
         ]
@@ -120,14 +102,15 @@ vnets = [
 
         vms = [
           {
-            name = "vm2a"
+            name = "vn2-sn2-vm1"
             size = "Standard_B2s"
 
             admin_username = "adminuser"
             admin_password = "p@ssw0rd1234!!"
 
+            enable_ip_forwarding = true
+
             os_disk = {
-              name                 = "vm2-os"
               caching              = "ReadWrite"
               storage_account_type = "Standard_LRS"
             }
@@ -141,20 +124,18 @@ vnets = [
 
             network_interface = {
               ip_configuration = {
-                name                          = "internal"
-                private_ip_address_allocation = "Dynamic"
+                name = "config-custom"
               }
             }
           },
           {
-            name = "vm2b"
+            name = "vn2-sn2-vm2"
             size = "Standard_B2s"
 
             admin_username = "adminuser"
             admin_password = "p@ssw0rd1234!!"
 
             os_disk = {
-              name                 = "vm2-os"
               caching              = "ReadWrite"
               storage_account_type = "Standard_LRS"
             }
@@ -168,7 +149,7 @@ vnets = [
 
             network_interface = {
               ip_configuration = {
-                name                          = "internal"
+                name                          = "config"
                 private_ip_address_allocation = "Dynamic"
               }
             }
@@ -178,4 +159,3 @@ vnets = [
     ]
   }
 ]
-
