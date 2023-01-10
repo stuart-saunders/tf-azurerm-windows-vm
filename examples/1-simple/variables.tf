@@ -1,6 +1,6 @@
 variable "resource_group" {
   type = object({
-    name = string
+    name     = string
     location = string
   })
 }
@@ -42,7 +42,7 @@ variable "vm" {
       name = optional(string, null)
 
       ip_configuration = object({
-        name = string
+        name                          = string
         private_ip_address_allocation = string
       })
     })

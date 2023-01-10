@@ -1,5 +1,5 @@
 resource_group = {
-  name = "rg-vm-module-test"
+  name     = "rg-vm-module-test"
   location = "uksouth"
 }
 
@@ -34,6 +34,7 @@ vm = {
   }
 
   network_interface = {
+    name = "internal-nic"
     ip_configuration = {
       name                          = "internal"
       private_ip_address_allocation = "Dynamic"

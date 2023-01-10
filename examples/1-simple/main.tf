@@ -17,6 +17,18 @@ resource "azurerm_subnet" "this" {
   address_prefixes     = var.vnet.subnet.address_prefixes
 }
 
+resource "azurerm_network_interface" "external" {
+  name                = "external-nic"
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+
+  ip_configuration {
+    name                          = var.vm.network_interface.ip_configuration.name
+    private_ip_address_allocation = var.vm.network_interface.ip_configuration.private_ip_address_allocation
+    subnet_id                     = azurerm_subnet.this.id
+  }
+}
+
 module "vm" {
   source = "../../"
 
@@ -32,11 +44,14 @@ module "vm" {
   os_disk                = var.vm.os_disk
   source_image_reference = var.vm.source_image_reference
 
+  network_interface_ids = [azurerm_network_interface.external.id]
+
   network_interface = {
+    name = var.vm.network_interface.name
     ip_configuration = {
-      name = var.vm.network_interface.ip_configuration.name
+      name                          = var.vm.network_interface.ip_configuration.name
       private_ip_address_allocation = var.vm.network_interface.ip_configuration.private_ip_address_allocation
-      subnet_id = azurerm_subnet.this.id
+      subnet_id                     = azurerm_subnet.this.id
     }
   }
 }
