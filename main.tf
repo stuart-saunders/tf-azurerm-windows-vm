@@ -1,21 +1,28 @@
 resource "azurerm_network_interface" "this" {
-  count = var.network_interface == null ? 0 : 1
+  name                = var.network_interface.name != null ? var.network_interface.name : local.defaults.network_interface.name #"${var.name}-nic"
+  location            = var.network_interface.location != null ? var.network_interface.location : var.location
+  resource_group_name = var.network_interface.resource_group_name != null ? var.network_interface.resource_group_name : var.resource_group_name
 
-  name                = var.network_interface.name != null ? var.network_interface.name : "${var.name}-nic"
-  location            = var.location
-  resource_group_name = var.resource_group_name
+  dns_servers                   = try(var.network_interface.dns_servers, null)
+  edge_zone                     = try(var.network_interface.edge_zone, null)
+  enable_ip_forwarding          = try(var.network_interface.enable_ip_forwarding, null)
+  enable_accelerated_networking = try(var.network_interface.enable_accelerated_networking, null)
+  internal_dns_name_label       = try(var.network_interface.internal_dns_name_label, null)
 
   ip_configuration {
-    name                          = var.network_interface.ip_configuration.name
-    subnet_id                     = var.network_interface.ip_configuration.subnet_id
-    private_ip_address_allocation = var.network_interface.ip_configuration.private_ip_address_allocation
+    name                          = var.network_interface.ip_configuration.name != null ? var.network_interface.ip_configuration.name : local.defaults.network_interface.ip_configuration.name
+    private_ip_address_allocation = var.network_interface.ip_configuration.private_ip_address_allocation != null ? var.network_interface.ip_configuration.private_ip_address_allocation : local.defaults.network_interface.ip_configuration.private_ip_address_allocation
 
-    gateway_load_balancer_frontend_ip_configuration_id = var.network_interface.ip_configuration.gateway_load_balancer_frontend_ip_configuration_id
-    primary                                            = var.network_interface.ip_configuration.primary
-    private_ip_address                                 = var.network_interface.ip_configuration.private_ip_address
-    private_ip_address_version                         = var.network_interface.ip_configuration.private_ip_address_version
-    public_ip_address_id                               = var.network_interface.ip_configuration.public_ip_address_id
+    gateway_load_balancer_frontend_ip_configuration_id = try(var.network_interface.ip_configuration.gateway_load_balancer_frontend_ip_configuration_id, null)
+
+    primary                    = try(var.network_interface.ip_configuration.primary, null)
+    private_ip_address         = try(var.network_interface.ip_configuration.private_ip_address, null)
+    private_ip_address_version = try(var.network_interface.ip_configuration.private_ip_address_version, null)
+    public_ip_address_id       = try(var.network_interface.ip_configuration.public_ip_address_id, null)
+    subnet_id                  = try(var.network_interface.ip_configuration.subnet_id, null)
   }
+
+  tags = try(var.network_interface.tags, null)
 }
 
 resource "azurerm_windows_virtual_machine" "this" {
@@ -28,12 +35,12 @@ resource "azurerm_windows_virtual_machine" "this" {
   admin_password = var.admin_password
 
   network_interface_ids = concat(
-    azurerm_network_interface.this != [] ? [ azurerm_network_interface.this[0].id ] : [],
+    [azurerm_network_interface.this.id],
     var.network_interface_ids
   )
 
   os_disk {
-    name = var.os_disk.name != null ? var.os_disk.name : "${var.name}-osdisk"
+    name = var.os_disk.name != null ? var.os_disk.name : local.defaults.os_disk.name #"${var.name}-osdisk"
 
     caching              = var.os_disk.caching
     storage_account_type = var.os_disk.storage_account_type
@@ -99,10 +106,12 @@ resource "azurerm_windows_virtual_machine" "this" {
   computer_name                 = var.computer_name
   custom_data                   = var.custom_data
   dedicated_host_id             = var.dedicated_host_id
+  dedicated_host_group_id       = var.dedicated_host_group_id
   edge_zone                     = var.edge_zone
   enable_automatic_updates      = var.enable_automatic_updates
   encryption_at_host_enabled    = var.encryption_at_host_enabled
   eviction_policy               = var.eviction_policy
+  extensions_time_budget        = var.extensions_time_budget
 
   dynamic "gallery_application" {
     for_each = var.gallery_application == null ? [] : [1]

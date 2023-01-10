@@ -76,33 +76,53 @@ variable "size" {
 
 variable "network_interface" {
   type = object({
-    name = optional(string, null)
-    ip_configuration = object({
-      name                          = string
-      subnet_id                     = string
-      private_ip_address_allocation = string
+    name                = optional(string, null)
+    location            = optional(string, null)
+    resource_group_name = optional(string, null)
+
+    dns_servers                   = optional(list(string), null)
+    edge_zone                     = optional(string, null)
+    enable_ip_forwarding          = optional(bool, null)
+    enable_accelerated_networking = optional(bool, null)
+    internal_dns_name_label       = optional(string, null)
+
+    ip_configuration = optional(object({
+      name                          = optional(string, null)
+      private_ip_address_allocation = optional(string, null)
 
       gateway_load_balancer_frontend_ip_configuration_id = optional(string, null)
       primary                                            = optional(bool, null)
       private_ip_address                                 = optional(string, null)
       private_ip_address_version                         = optional(string, null)
       public_ip_address_id                               = optional(string, null)
-    })
+      subnet_id                                          = optional(string, null)
+    }))
+
+    tags = optional(map(string), null)
   })
   description = <<-DESC
     The configuration of the Network Interface to be created for this VM.
-    **name**: The optional name for the Network Interface
+    **name**: The name for the Network Interface. Defaults to 'vmname-nic'.
+    **location**: The Azure region where the Network Interface should be created. Defaults to the VM location.
+    **resource_group_name": The Resource Group in which the Network Interface should be created. Defaults to the VM Resource Group.
+    **dns_servers**: A list of IP Addresses defining the DNS Servers which should be used for this Network Interface
+    **edge_zone**: Specifies the Edge Zone within the Azure Region where this Network Interface should exist
+    **enable_ip_forwarding**: Specifies if IP forwarding should be enabled
+    **enable_accelerated_networking**: Specifies if accelerated networking should be enabled
+    **internal_dns_name_label**: The (relative) DNS Name used for internal communications between Virtual Machines in the same Virtual Network
+    **tags**: A mapping of tags to assign to the resource
+
     The Network Interface's IP Configuration can be set with the following:-
-    **name**: _(Required)_ The name for this IP Configuration
-    **subnet_id**: _(Required)_ The ID of the subnet where this Network Interface should be located
-    **private_ip_address_allocation**: _(Required)_ The allocation method used for the Private IP Address. Possible values are `Dynamic` and `Static`.
+    **name**: The name for this IP Configuration. Defaults to "internal"
+    **private_ip_address_allocation**: The allocation method used for the Private IP Address. Possible values are `Dynamic` and `Static`. Defaults to `Dynamic`.
     **gateway_load_balancer_fronend_ip_configuration_id**: The Frontend IP Configuration ID of a Gateway SKU Load Balancer
     **primary**: To identify is this is the Primary IP Configuration
     **private_ip_address**: The static, private IP address for the Network Interface
     **private_ip_address_version**: The IP Version to use. Possible values are `IPv4` and `IPv6`.
     **public_ip_address_id**: Reference to a Public IP Address to associate with this NIC
+    **subnet_id**: The ID of the subnet where this Network Interface should be located
   DESC
-  default     = null
+  default     = {}
 }
 
 variable "additional_capabilities" {
@@ -339,6 +359,12 @@ variable "proximity_placement_group_id" {
   description = "The Id of the Proximity Placement Group to which the VM should be assigned"
   default     = null
 }
+
+# variable "public_ip_sku" {
+#   type = string
+#   description = "The Sku of any Public IP that should be associated with the Network Interface. Possible values are `Basic` or `Standard`."
+#   default = null
+# }
 
 variable "secret" {
   type = object({
